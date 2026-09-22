@@ -63,9 +63,33 @@ const isDark = (pathname: string) =>
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const darkHero = isDark(location.pathname) && !scrolled;
+
+  const close = () => {
+    setOpen(false);
+    setOpenGroup(null);
+  };
+
+  useEffect(() => {
+    close();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
