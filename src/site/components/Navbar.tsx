@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, ArrowRight, X, ChevronDown, Mail, Phone } from "lucide-react";
@@ -89,11 +90,17 @@ const Navbar = () => {
       if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overscrollBehavior = prevOverscroll;
     };
   }, [open]);
 
@@ -190,13 +197,14 @@ const Navbar = () => {
       </div>
 
       {/* Mobile full-screen panel */}
-      {open && (
+      {open &&
+        createPortal(
         <div
           id="mobile-nav-panel"
           role="dialog"
           aria-modal="true"
           aria-label="Site navigation"
-          className="md:hidden fixed inset-x-0 bottom-0 top-16 z-50 flex flex-col bg-background animate-in fade-in slide-in-from-top-2 duration-200"
+          className="md:hidden fixed inset-x-0 bottom-0 top-16 z-[999] flex flex-col bg-background animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
             <Link to="/" onClick={close} aria-label="Clinexus home">
@@ -307,7 +315,8 @@ const Navbar = () => {
               </Button>
             </a>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </nav>
   );
