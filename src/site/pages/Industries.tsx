@@ -1,173 +1,176 @@
+import { useMemo, useState } from "react";
 import Layout from "@/site/components/Layout";
 import PageHero from "@/site/components/PageHero";
-import IndustryIllustration from "@/site/components/IndustryIllustration";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import {
-  Heart, Eye, Stethoscope, CheckCircle2, ArrowRight,
-  Baby, Bone, Brain, Scissors, Smile, Ear, Syringe,
-  Activity, Sparkles
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-const industries = [
+type Specialty = {
+  code: string;
+  title: string;
+  group: "Outpatient" | "Diagnostic" | "Surgical";
+  summary: string;
+  pills: string[];
+  href?: string;
+};
+
+const flagships = [
   {
-    icon: Smile,
-    learnMore: "/industries/dental-clinics",
+    code: "SPEC-01",
+    module: "MODULE: DENTAL",
     title: "Dental Clinics",
-    tagline: "Because managing teeth shouldn't give you a headache.",
-    description: "You're juggling treatment plans, recall schedules, X-ray files, and billing for multi-step procedures, all while trying to keep your chairs full. Clinexus was purpose-built for the chaos of a busy dental practice.",
-    painPoints: [
-"Track treatments, procedures & dental charting digitally",
-"Automate recall reminders so patients don't disappear",
-"Bill accurately for multi-visit procedures (root canals, implants)",
-"Organize X-rays, panoramic scans & intraoral images per patient",
-"Manage dental supply inventory with expiry tracking",
-    ],
+    summary:
+      "Charting, multi-visit billing and recall automation built around how a busy chair actually runs.",
+    pills: ["Perio & tooth charting", "Multi-visit billing", "X-ray / imaging vault", "Recall automation"],
+    href: "/industries/dental-clinics",
+    preview: (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+          <span>Tooth chart</span>
+          <span className="tabular-nums">32 / 32</span>
+        </div>
+        <div className="grid grid-cols-8 gap-1.5">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-7 rounded-[4px] border ${
+                [3, 9, 12].includes(i)
+                  ? "border-primary/40 bg-primary/25"
+                  : [5].includes(i)
+                    ? "border-destructive/40 bg-destructive/20"
+                    : "border-border/70 bg-muted/50"
+              }`}
+            />
+          ))}
+        </div>
+        <div className="flex gap-2 text-[11px] text-muted-foreground">
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">Treated</span>
+          <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-destructive">Caries</span>
+          <span className="rounded-full bg-muted px-2 py-0.5">Healthy</span>
+        </div>
+      </div>
+    ),
   },
   {
-    icon: Eye,
-    learnMore: "/industries/eye-clinics",
-    title: "Eye Care & Optometry Clinics",
-    tagline: "See your practice clearly, for the first time.",
-    description: "Between visual acuity records, prescription histories, lens inventory, and specialist referrals, optometry practices have unique data management challenges. Clinexus understands every one of them.",
-    painPoints: [
-"Record visual acuity, refraction data & prescription history",
-"Manage lens & frame inventory with vendor price tracking",
-"Coordinate specialist referrals & follow-ups seamlessly",
-"Store retinal scans, OCT results & imaging securely",
-"Track contact lens orders and patient reorder cycles",
-    ],
-  },
-  {
-    icon: Stethoscope,
-    title: "General Practice & Family Clinics",
-    tagline: "The backbone of healthcare deserves better tools.",
-    description: "You see everything, from flu to chronic conditions, from newborns to the elderly. You need a system as versatile as you are, not one that forces you into rigid workflows designed for someone else.",
-    painPoints: [
-"Streamline patient intake, triage & consultations",
-"Manage lab orders, results & e-prescriptions in one place",
-"Track chronic conditions with ongoing care plans",
-"Generate compliance reports and complete audit trails",
-"Handle walk-ins and appointments side by side",
-    ],
-  },
-  {
-    icon: Baby,
-    title: "Pediatric Clinics",
-    tagline: "They grow fast. Your records should keep up.",
-    description: "Growth charts, vaccination schedules, developmental milestones, pediatric care demands tracking that evolves with every child. Parents expect modern communication. Clinexus delivers both.",
-    painPoints: [
-"Automated vaccination schedule tracking & reminders",
-"Growth chart integration with milestone monitoring",
-"Parent communication via SMS & email for appointments",
-"Age-appropriate consultation templates",
-"Sibling & family record linking",
-    ],
-  },
-  {
-    icon: Bone,
-    title: "Orthopedic & Physiotherapy Clinics",
-    tagline: "Fix bodies. We'll fix your workflow.",
-    description: "Long treatment cycles, therapy sessions, imaging follow-ups, and equipment tracking make ortho/physio practices uniquely complex. Clinexus keeps every session, scan, and progress note connected.",
-    painPoints: [
-"Track multi-session treatment plans & progress notes",
-"Schedule recurring physiotherapy appointments easily",
-"Store & compare imaging (X-ray, MRI) across visits",
-"Manage therapy equipment & consumable inventory",
-"Generate treatment progress reports for referrals",
-    ],
-  },
-  {
-    icon: Scissors,
-    title: "Dermatology & Aesthetic Clinics",
-    tagline: "Beautiful results start with beautiful systems.",
-    description: "Before-and-after photos, product inventory, recurring treatments, consent forms, aesthetic practices run on detail. Clinexus organizes it all so you can focus on transformations.",
-    painPoints: [
-"Before/after photo storage linked to patient records",
-"Track aesthetic product inventory & batch numbers",
-"Schedule recurring treatments (Botox, fillers, peels)",
-"Digital consent forms with e-signatures",
-"Revenue tracking by procedure type & provider",
-    ],
-  },
-  {
-    icon: Heart,
-    title: "Cardiology Clinics",
-    tagline: "Your patients' hearts are in good hands. So is your data.",
-    description: "ECG records, chronic medication management, follow-up scheduling for high-risk patients, cardiology demands precision in both care and administration. Clinexus handles the latter.",
-    painPoints: [
-"Store ECG, echo & stress test results per patient",
-"Chronic medication tracking with refill alerts",
-"Risk stratification & follow-up scheduling",
-"Integration-ready for diagnostic equipment data",
-"Detailed visit summaries for specialist referrals",
-    ],
-  },
-  {
-    icon: Ear,
-    title: "ENT Clinics",
-    tagline: "We hear you. Your admin burden is real.",
-    description: "Audiometry results, surgical follow-ups, allergy tracking, and procedure-heavy billing make ENT practices a unique challenge. Clinexus adapts to your specialty's specific needs.",
-    painPoints: [
-"Store audiometry & endoscopy results per patient",
-"Track allergy test results & immunotherapy schedules",
-"Manage surgical pre-op & post-op workflows",
-"Procedure-based billing with CPT/ICD support",
-"Equipment sterilization & maintenance logging",
-    ],
-  },
-  {
-    icon: Brain,
-    title: "Neurology & Psychiatry Clinics",
-    tagline: "Complex care. Simple management.",
-    description: "Long consultations, detailed psychometric assessments, medication adjustments, and sensitive patient data, mental health and neurology practices need a system built for depth and discretion.",
-    painPoints: [
-"Extended consultation note templates (30–60 min sessions)",
-"Psychometric assessment tracking & scoring",
-"Medication history with interaction warnings",
-"Enhanced privacy controls for sensitive records",
-"Session-based billing & insurance claim support",
-    ],
-  },
-  {
-    icon: Syringe,
-    title: "Diagnostic & Lab Centers",
-    tagline: "Process more samples. Lose fewer results.",
-    description: "High volume, fast turnaround, and zero tolerance for errors. Diagnostic centers need bulletproof tracking from sample collection to result delivery. Clinexus keeps every step visible.",
-    painPoints: [
-"Sample collection tracking with barcode support",
-"Automated result delivery to referring physicians",
-"Abnormal value flagging & critical alerts",
-"Batch processing & high-volume workflow support",
-"Revenue analytics by test type & referral source",
-    ],
-  },
-  {
-    icon: Sparkles,
-    title: "Wellness & Integrative Medicine",
-    tagline: "Holistic care deserves a holistic system.",
-    description: "Acupuncture, nutrition counseling, chiropractic adjustments, and holistic therapies, your practice doesn't fit into a cookie-cutter EMR. Clinexus is flexible enough to support your unique modalities.",
-    painPoints: [
-"Custom treatment modality tracking",
-"Package-based billing for treatment bundles",
-"Wellness goal tracking & progress journaling",
-"Supplement & product inventory management",
-"Client communication & retention campaigns",
-    ],
+    code: "SPEC-02",
+    module: "MODULE: OPTOMETRY",
+    title: "Eye Care & Optometry",
+    summary:
+      "Refraction records, lens and frame stock, and referral loops kept in one continuous patient file.",
+    pills: ["Refraction & acuity", "Lens & frame stock", "OCT / retinal scans", "Reorder cycles"],
+    href: "/industries/eye-clinics",
+    preview: (
+      <div className="space-y-3">
+        <div className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+          Prescription
+        </div>
+        <div className="overflow-hidden rounded-lg border border-border/70">
+          <div className="grid grid-cols-4 bg-muted/60 px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
+            <span>Eye</span>
+            <span>SPH</span>
+            <span>CYL</span>
+            <span>AXIS</span>
+          </div>
+          {[
+            ["OD", "-2.25", "-0.75", "180"],
+            ["OS", "-1.75", "-0.50", "175"],
+          ].map((row) => (
+            <div
+              key={row[0]}
+              className="grid grid-cols-4 border-t border-border/60 px-3 py-2 text-sm tabular-nums text-foreground"
+            >
+              <span className="font-medium text-primary">{row[0]}</span>
+              <span>{row[1]}</span>
+              <span>{row[2]}</span>
+              <span>{row[3]}</span>
+            </div>
+          ))}
+        </div>
+        <div className="text-[11px] text-muted-foreground">Next review in 11 months · reminder queued</div>
+      </div>
+    ),
   },
 ];
 
-const artFor = (title: string) => {
-  const map: Record<string, string> = {"Dental": "dental", "Eye Care": "eye", "General Practice": "stethoscope", "Pediatric": "baby", "Orthopedic": "bone", "Dermatology": "derma", "Cardiology": "heart", "ENT": "ear", "Neurology": "brain", "Diagnostic": "lab", "Wellness": "wellness"};
-  const key = Object.keys(map).find((k) => title.startsWith(k));
-  return key ? map[key] : "stethoscope";
-};
+const specialties: Specialty[] = [
+  {
+    code: "SPEC-03",
+    title: "General & Family Practice",
+    group: "Outpatient",
+    summary: "Walk-ins and booked visits side by side, with labs and prescriptions attached to the note.",
+    pills: ["Triage", "E-prescriptions", "Chronic care plans"],
+  },
+  {
+    code: "SPEC-04",
+    title: "Pediatrics",
+    group: "Outpatient",
+    summary: "Immunisation schedules, growth tracking and parent reminders that fire on their own.",
+    pills: ["Vaccine schedules", "Growth charts", "Family linking"],
+  },
+  {
+    code: "SPEC-05",
+    title: "Orthopedics & Physiotherapy",
+    group: "Surgical",
+    summary: "Long treatment cycles stay readable: every session, scan and progress note in sequence.",
+    pills: ["Session plans", "Imaging compare", "Equipment log"],
+  },
+  {
+    code: "SPEC-06",
+    title: "Dermatology & Aesthetics",
+    group: "Surgical",
+    summary: "Before-and-after imagery, batch-tracked products and signed consent in the same record.",
+    pills: ["Photo timeline", "Batch tracking", "E-signatures"],
+  },
+  {
+    code: "SPEC-07",
+    title: "Cardiology",
+    group: "Diagnostic",
+    summary: "ECG and echo results, refill alerts and risk-based follow-up for high-risk patients.",
+    pills: ["ECG storage", "Refill alerts", "Risk follow-up"],
+  },
+  {
+    code: "SPEC-08",
+    title: "ENT",
+    group: "Surgical",
+    summary: "Audiometry, allergy schedules and procedure billing without spreadsheets on the side.",
+    pills: ["Audiometry", "Pre/post-op", "Procedure billing"],
+  },
+  {
+    code: "SPEC-09",
+    title: "Neurology & Psychiatry",
+    group: "Outpatient",
+    summary: "Long-form notes, assessment scoring and tighter privacy controls for sensitive files.",
+    pills: ["Long notes", "Assessment scoring", "Restricted access"],
+  },
+  {
+    code: "SPEC-10",
+    title: "Diagnostic & Lab Centers",
+    group: "Diagnostic",
+    summary: "Samples tracked from collection to delivery, with abnormal values flagged automatically.",
+    pills: ["Barcode intake", "Critical flags", "Auto-delivery"],
+  },
+  {
+    code: "SPEC-11",
+    title: "Wellness & Integrative",
+    group: "Outpatient",
+    summary: "Custom modalities, package billing and retention campaigns for non-standard care.",
+    pills: ["Custom modalities", "Package billing", "Retention"],
+  },
+];
+
+const filters = ["All", "Outpatient", "Diagnostic", "Surgical"] as const;
 
 const Industries = () => {
+  const [active, setActive] = useState<(typeof filters)[number]>("All");
+
+  const visible = useMemo(
+    () => (active === "All" ? specialties : specialties.filter((s) => s.group === active)),
+    [active],
+  );
+
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
         eyebrow="Industries we serve"
         title="Built for your kind of clinic."
@@ -180,75 +183,129 @@ const Industries = () => {
         ]}
       />
 
-      {/* Industries Grid */}
-      <section className="relative site-section-light overflow-hidden py-24">
-        <div className="pointer-events-none absolute inset-0 bg-background" />
+      {/* Flagship specialties */}
+      <section className="border-b border-border/60 bg-background py-20">
+        <div className="container">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+                Deep-built verticals
+              </p>
+              <h2 className="mt-2 text-foreground">Two specialties, fully tooled</h2>
+            </div>
+            <p className="max-w-sm text-sm text-muted-foreground">
+              Dedicated modules, not relabelled forms — charting, stock and billing shaped per specialty.
+            </p>
+          </div>
 
-        <div className="container relative z-10 space-y-20">
-          {industries.map((ind, i) => (
-            <motion.div
-              key={ind.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className={`flex flex-col items-center gap-12 md:flex-row ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
-            >
-              <div className="flex-1 space-y-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-                  <ind.icon className="h-7 w-7 text-primary" />
+          <div className="grid gap-6 md:grid-cols-2">
+            {flagships.map((f, i) => (
+              <motion.article
+                key={f.code}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              >
+                <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>{f.code}</span>
+                  <span className="text-primary">{f.module}</span>
                 </div>
-                <h3 className="text-2xl font-bold text-foreground">{ind.title}</h3>
-                <p className="text-sm font-medium italic text-primary">{ind.tagline}</p>
-                <p className="leading-relaxed text-muted-foreground">{ind.description}</p>
-                <ul className="space-y-2.5">
-                  {ind.painPoints.map((p) => (
-                    <li key={p} className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {p}
-                    </li>
+
+                <h3 className="mt-4 text-foreground">{f.title}</h3>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{f.summary}</p>
+
+                <div className="mt-6 rounded-xl border border-border/70 bg-background/60 p-4">{f.preview}</div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {f.pills.map((p) => (
+                    <span
+                      key={p}
+                      className="rounded-full border border-border/70 px-3 py-1 text-xs text-muted-foreground"
+                    >
+                      {p}
+                    </span>
                   ))}
-                </ul>
-                <div className="mt-2 flex flex-wrap gap-3">
-                  <a href="https://wa.me/2349017758165" target="_blank" rel="noopener noreferrer">
-                    <Button className="gap-2 rounded-md bg-primary px-8 text-white shadow-md hover:opacity-90">
-                      Get Started <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </a>
-                  {"learnMore" in ind && ind.learnMore && (
-                    <Link to={ind.learnMore as string}>
-                      <Button
-                        variant="outline"
-                        className="gap-2 rounded-full border-primary px-8 text-primary hover:bg-primary/10"
-                      >
-                        Know more <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
+                </div>
+
+                <Link
+                  to={f.href}
+                  className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary"
+                >
+                  Explore {f.title.split(" ")[0]}
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* All specialties */}
+      <section className="bg-background py-20">
+        <div className="container">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+                Every other practice
+              </p>
+              <h2 className="mt-2 text-foreground">Nine more specialties, same core</h2>
+            </div>
+
+            <div className="inline-flex rounded-full border border-border bg-card p-1">
+              {filters.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setActive(f)}
+                  className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                    active === f
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((s) => (
+              <div
+                key={s.code}
+                className="group flex flex-col bg-card p-6 transition-colors hover:bg-accent/40"
+              >
+                <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>{s.code}</span>
+                  <span>{s.group}</span>
+                </div>
+                <h3 className="mt-3 text-base font-semibold text-foreground">{s.title}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {s.pills.map((p) => (
+                    <span
+                      key={p}
+                      className="rounded-md bg-muted px-2 py-1 text-[11px] text-muted-foreground"
+                    >
+                      {p}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <div className="flex-1">
-                <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-card p-8 shadow-lg">
-                  <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
-                  <IndustryIllustration variant={artFor(ind.title)} className="relative mx-auto h-64 w-full max-w-sm" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="relative overflow-hidden bg-[hsl(var(--medical-blue-dark))] py-20">
-        <div className="pointer-events-none absolute inset-0 " />
         <div className="container relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="mb-4 text-3xl font-bold text-white">Don't See Your Specialty?</h2>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 className="mb-4 text-3xl font-bold text-white">Don't see your specialty?</h2>
             <p className="mx-auto mb-8 max-w-xl text-white/60">
-              Clinexus is flexible enough to support virtually any healthcare practice. If you don't see your specialty listed, reach out, we'll show you exactly how it fits.
+              Clinexus is flexible enough to support virtually any healthcare practice. Reach out and we'll
+              show you exactly how it fits.
             </p>
             <Link to="/contact">
               <Button size="lg" className="gap-2 rounded-md bg-primary px-10 text-white shadow-lg hover:opacity-90">
