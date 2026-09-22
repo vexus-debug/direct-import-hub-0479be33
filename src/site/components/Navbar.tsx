@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, ArrowRight, X, ChevronDown, Mail, Phone } from "lucide-react";
@@ -89,11 +90,17 @@ const Navbar = () => {
       if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overscrollBehavior = prevOverscroll;
     };
   }, [open]);
 
