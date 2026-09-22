@@ -315,7 +315,8 @@ const Navbar = () => {
               </Button>
             </a>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </nav>
   );
