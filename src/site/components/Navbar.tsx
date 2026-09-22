@@ -15,6 +15,14 @@ const mobileGroups = [
     ],
   },
   {
+    label: "Tutorials",
+    items: [
+      { label: "All tutorials", to: "/tutorials" },
+      { label: "Eye clinic", to: "/tutorials/eye-clinics" },
+      { label: "Dental clinic", to: "/tutorials/dental-clinics" },
+    ],
+  },
+  {
     label: "Features",
     items: [
       { label: "Eye clinic features", to: "/industries/eye-clinics/features" },
@@ -34,7 +42,6 @@ const mobileGroups = [
 
 const mobileDirect = [
   { label: "Home", to: "/" },
-  { label: "Tutorials", to: "/tutorials" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
