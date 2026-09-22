@@ -32,7 +32,6 @@ const mobileGroups = [
   {
     label: "Resources",
     items: [
-      { label: "Tutorials", to: "/tutorials" },
       { label: "Privacy Policy", to: "/privacy" },
       { label: "Terms of Service", to: "/terms" },
       { label: "Cookie Policy", to: "/cookies" },
