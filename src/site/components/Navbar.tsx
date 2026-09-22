@@ -197,13 +197,14 @@ const Navbar = () => {
       </div>
 
       {/* Mobile full-screen panel */}
-      {open && (
+      {open &&
+        createPortal(
         <div
           id="mobile-nav-panel"
           role="dialog"
           aria-modal="true"
           aria-label="Site navigation"
-          className="md:hidden fixed inset-x-0 bottom-0 top-16 z-50 flex flex-col bg-background animate-in fade-in slide-in-from-top-2 duration-200"
+          className="md:hidden fixed inset-x-0 bottom-0 top-16 z-[999] flex flex-col bg-background animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
             <Link to="/" onClick={close} aria-label="Clinexus home">
